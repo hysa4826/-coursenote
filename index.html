@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>코스노트</title>
+<style>
+:root{--bg:#f3f4f6;--ink:#17191d;--sub:#969ba3;--line:#e9ebee;--blue:#2584ff;--danger:#d63e46}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",sans-serif}
+button,input{font:inherit}button{cursor:pointer}
+.app{width:min(100%,460px);min-height:100dvh;margin:auto;background:#fff;padding:max(18px,env(safe-area-inset-top)) 16px max(34px,env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;justify-content:space-between;margin:4px 1px 24px}
+.brand{font-size:22px;font-weight:900;letter-spacing:-.05em}.header-actions{display:flex;gap:7px}
+.pill{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 13px;font-size:12px;color:#30343a}
+.month-nav{display:grid;grid-template-columns:42px 1fr 42px;align-items:center;margin-bottom:14px}
+.month-nav strong{text-align:center;font-size:21px}.month-nav button{border:0;background:none;font-size:23px;color:#777}
+.week,.days{display:grid;grid-template-columns:repeat(7,1fr);text-align:center}.week{font-size:11px;color:var(--sub);margin-bottom:7px}
+.day{aspect-ratio:1;display:grid;place-items:center;border-radius:50%;font-size:14px;position:relative;user-select:none}
+.day.muted{color:#d1d4d9}.day.has::after{content:"";position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%;background:#222}
+.day.active{background:#1b1e22;color:#fff;font-weight:800}.day.active::after{background:#ffd62e}
+.section-head{display:flex;justify-content:space-between;align-items:end;margin:28px 2px 13px}
+.section-head h2{margin:0;font-size:20px;letter-spacing:-.04em}.section-head span{font-size:12px;color:var(--sub)}
+.schedule{border:1px solid var(--line);border-radius:21px;padding:16px;margin-bottom:12px;background:#fff}
+.s-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:13px}
+.s-title{font-size:18px;font-weight:850}.s-time{font-size:12px;color:var(--sub);margin-top:5px}
+.top-actions{display:flex;gap:5px}.icon-btn{border:1px solid var(--line);background:#fff;border-radius:9px;padding:6px 8px;font-size:10px;color:#555}
+.places{border-top:1px solid var(--line)}
+.place{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:9px;align-items:center;padding:14px 0;border-bottom:1px solid #eff0f2}
+.place:last-child{border-bottom:0}.num{font-size:12px;color:#a0a5ac}
+.place-name{font-size:14px;font-weight:780;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{font-size:11px;color:var(--sub);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.place-right{display:flex;align-items:center;gap:4px}
+.open-link{border:0;background:#f4f5f6;border-radius:11px;padding:8px 10px;font-size:11px;color:#222;text-decoration:none;white-space:nowrap}
+.more-btn{border:0;background:#fff;padding:7px 2px;font-size:18px;color:#90959d}
+.inline-tools{grid-column:2/4;display:none;gap:5px;flex-wrap:wrap;margin-top:2px}.place.open .inline-tools{display:flex}
+.inline-tools button{border:0;background:#f4f5f6;border-radius:8px;padding:6px 9px;font-size:10px;color:#666c74}.inline-tools .danger{color:var(--danger)}
+.card-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.secondary,.primary,.wide{border-radius:14px;padding:12px;font-size:13px;font-weight:780}
+.secondary{border:1px solid var(--line);background:#fff;color:var(--blue)}
+.primary{border:1px solid #191c20;background:#191c20;color:#fff}
+.wide{width:100%;border:1px dashed #ccd1d7;background:#fafbfc;margin-top:3px;color:var(--blue)}
+.empty{padding:20px;text-align:center;color:var(--sub);font-size:12px;border:1px dashed #d8dbe0;border-radius:16px;margin-bottom:10px}
+.modal{position:fixed;inset:0;background:#0007;display:none;align-items:flex-end;justify-content:center;z-index:5000}.modal.show{display:flex}
+.sheet{width:min(460px,100%);background:#fff;border-radius:24px 24px 0 0;padding:14px 16px max(22px,env(safe-area-inset-bottom));max-height:88dvh;overflow:auto}
+.grab{width:38px;height:4px;border-radius:99px;background:#d9dce0;margin:0 auto 14px}
+.sheet h3{font-size:20px;margin:0 0 16px;letter-spacing:-.03em}.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;color:#777d85;margin:0 0 6px 2px}
+.field input{width:100%;height:48px;border:1px solid #dfe2e6;border-radius:14px;padding:0 13px;outline:none;background:#fff;font-size:15px;color:#17191d}
+.field input:focus{border-color:#8b9097}.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sheet-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.sheet-actions button{height:50px}
+.hint{font-size:10.5px;line-height:1.55;color:var(--sub);margin-top:7px}.settings{display:grid;gap:8px}
+.settings button{width:100%;border:1px solid var(--line);background:#fff;text-align:left;border-radius:13px;padding:13px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#17191ded;color:#fff;border-radius:999px;padding:10px 14px;font-size:12px;display:none;z-index:7000;white-space:nowrap}
+</style>
+</head>
+<body>
+<main class="app">
+<header>
+  <div class="brand">코스노트</div>
+  <div class="header-actions">
+    <button class="pill" id="shareDayBtn">공유</button>
+    <button class="pill" id="settingsBtn">설정</button>
+  </div>
+</header>
+
+<div class="month-nav">
+  <button id="prevMonth">‹</button>
+  <strong id="monthLabel"></strong>
+  <button id="nextMonth">›</button>
+</div>
+
+<div class="week"><div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div></div>
+<div class="days" id="calendar"></div>
+
+<div class="section-head">
+  <h2 id="dateTitle"></h2>
+  <span id="countText"></span>
+</div>
+
+<div id="scheduleList"></div>
+<button class="wide" id="addScheduleBtn">＋ 일정 추가</button>
+</main>
+
+<div class="modal" id="scheduleModal">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h3 id="scheduleModalTitle">새 일정</h3>
+    <input type="hidden" id="scheduleId">
+    <div class="field"><label>일정 이름</label><input id="scheduleName" placeholder="예: 혜화 나들이"></div>
+    <div class="two">
+      <div class="field"><label>날짜</label><input id="scheduleDate" type="date"></div>
+      <div class="field"><label>약속 시간</label><input id="scheduleTime" type="time"></div>
+    </div>
+    <div class="sheet-actions">
+      <button class="secondary close-modal" data-modal="scheduleModal">취소</button>
+      <button class="primary" id="saveScheduleBtn">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="placeModal">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h3 id="placeModalTitle">장소 / 링크 추가</h3>
+    <input type="hidden" id="placeScheduleId">
+    <input type="hidden" id="placeIndex">
+    <div class="field"><label>네이버지도 · 전시 · 예매 링크</label><input id="placeLink" inputmode="url" placeholder="링크를 붙여넣으세요"></div>
+    <div class="field"><label>장소·전시·연극 이름</label><input id="placeName" placeholder="예: 대학로예술극장"></div>
+    <div class="field"><label>키워드</label><input id="placeTag" placeholder="예: 공연 · 혜화"></div>
+    <div class="hint">입력한 링크는 일정에서 ‘열기’를 누르면 그대로 연결됩니다. 네이버지도, 공연 예매 페이지, 전시 공식 페이지 등 어떤 링크든 사용할 수 있습니다.</div>
+    <div class="sheet-actions">
+      <button class="secondary close-modal" data-modal="placeModal">취소</button>
+      <button class="primary" id="savePlaceBtn">저장</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="settingsModal">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h3>설정 / 데이터</h3>
+    <div class="settings">
+      <button id="backupBtn">백업 파일 내보내기</button>
+      <button id="restoreBtn">백업 파일 불러오기</button>
+      <input id="restoreFile" type="file" accept=".json,application/json" hidden>
+      <button id="resetBtn">샘플 데이터로 초기화</button>
+    </div>
+    <div class="sheet-actions">
+      <button class="secondary close-modal" data-modal="settingsModal">닫기</button>
+      <button class="primary" id="copyAllBtn">전체 일정 복사</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+const STORE="coursenote-github-v4";
+const MIGRATE=["coursenote-github-v3","coursenote-github-v2","coursenote-github-v1"];
+const SAMPLE=[{id:"a",date:"2026-09-20",name:"혜화 나들이",time:"14:00",places:[
+{name:"연극 〈옥탑방 고양이〉",tag:"공연 · 대학로",link:"https://map.naver.com/"},
+{name:"카페",tag:"카페 · 디저트",link:"https://map.naver.com/"},
+{name:"저녁",tag:"한식 · 식사",link:"https://map.naver.com/"},
+{name:"술집",tag:"바 · 안주",link:"https://map.naver.com/"}]}];
+
+function clone(v){return JSON.parse(JSON.stringify(v))}
+function $(id){return document.getElementById(id)}
+function pad(n){return String(n).padStart(2,"0")}
+function iso(y,m,d){return y+"-"+pad(m+1)+"-"+pad(d)}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]})}
+function safeLink(v){return /^https?:\/\//i.test(v||"")?v:"#"}
+
+let data=load();
+let selectedDate="2026-09-20";
+let viewYear=2026,viewMonth=8;
+
+function load(){
+  try{
+    const current=localStorage.getItem(STORE);
+    if(current)return JSON.parse(current);
+    for(let i=0;i<MIGRATE.length;i++){
+      const old=localStorage.getItem(MIGRATE[i]);
+      if(old){
+        const parsed=JSON.parse(old);
+        parsed.forEach(function(s){(s.places||[]).forEach(function(p){delete p.lat;delete p.lng})});
+        localStorage.setItem(STORE,JSON.stringify(parsed));
+        return parsed;
+      }
+    }
+    return clone(SAMPLE);
+  }catch(e){return clone(SAMPLE)}
+}
+function persist(){localStorage.setItem(STORE,JSON.stringify(data))}
+function toast(msg){
+  const t=$("toast");t.textContent=msg;t.style.display="block";
+  clearTimeout(window.__toast);window.__toast=setTimeout(function(){t.style.display="none"},1600)
+}
+function openModal(id){$(id).classList.add("show")}
+function closeModal(id){$(id).classList.remove("show")}
+function getDaySchedules(){return data.filter(function(s){return s.date===selectedDate})}
+function selectedParts(){const a=selectedDate.split("-").map(Number);return {y:a[0],m:a[1],d:a[2]}}
+
+function renderCalendar(){
+  $("monthLabel").textContent=viewYear+"년 "+(viewMonth+1)+"월";
+  const box=$("calendar");box.innerHTML="";
+  const first=new Date(viewYear,viewMonth,1).getDay();
+  const prevLast=new Date(viewYear,viewMonth,0).getDate();
+
+  for(let i=first-1;i>=0;i--){
+    const el=document.createElement("div");el.className="day muted";el.textContent=prevLast-i;box.appendChild(el)
+  }
+
+  const days=new Date(viewYear,viewMonth+1,0).getDate();
+  for(let d=1;d<=days;d++){
+    const date=iso(viewYear,viewMonth,d);
+    const el=document.createElement("div");
+    el.className="day"+(data.some(function(s){return s.date===date})?" has":"")+(date===selectedDate?" active":"");
+    el.textContent=d;
+    el.onclick=function(){selectedDate=date;render()};
+    box.appendChild(el)
+  }
+
+  const used=first+days,tail=(7-(used%7))%7;
+  for(let d=1;d<=tail;d++){const el=document.createElement("div");el.className="day muted";el.textContent=d;box.appendChild(el)}
+}
+
+function render(){
+  renderCalendar();
+  const p=selectedParts();
+  $("dateTitle").textContent=p.m+"월 "+p.d+"일 일정";
+  const list=getDaySchedules();
+  $("countText").textContent=list.length+"개의 일정";
+  const host=$("scheduleList");
+
+  if(!list.length){
+    host.innerHTML='<div class="empty">이 날짜에는 아직 일정이 없습니다.</div>';
+    return;
+  }
+
+  host.innerHTML=list.map(function(s){
+    const places=s.places.length?s.places.map(function(p,i){
+      const hasLink=/^https?:\/\//i.test(p.link||"");
+      return '<div class="place" data-place-row>'+
+        '<div class="num">'+pad(i+1)+'</div>'+
+        '<div><div class="place-name">'+esc(p.name)+'</div><div class="meta">'+esc(p.tag||"")+'</div></div>'+
+        '<div class="place-right">'+
+          (hasLink?'<a class="open-link" href="'+esc(safeLink(p.link))+'" target="_blank" rel="noopener">열기 ↗</a>':'')+
+          '<button class="more-btn" data-act="toggleTools" aria-label="장소 메뉴">⋯</button>'+
+        '</div>'+
+        '<div class="inline-tools">'+
+          '<button data-act="up" data-sid="'+s.id+'" data-index="'+i+'" '+(i===0?'disabled':'')+'>↑ 위</button>'+
+          '<button data-act="down" data-sid="'+s.id+'" data-index="'+i+'" '+(i===s.places.length-1?'disabled':'')+'>↓ 아래</button>'+
+          '<button data-act="editPlace" data-sid="'+s.id+'" data-index="'+i+'">수정</button>'+
+          '<button class="danger" data-act="deletePlace" data-sid="'+s.id+'" data-index="'+i+'">삭제</button>'+
+        '</div>'+
+      '</div>';
+    }).join(""):'<div class="empty">아직 추가된 장소가 없습니다.</div>';
+
+    return '<section class="schedule">'+
+      '<div class="s-top">'+
+        '<div><div class="s-title">'+esc(s.name)+'</div><div class="s-time">약속 '+esc(s.time||"시간 미정")+'</div></div>'+
+        '<div class="top-actions">'+
+          '<button class="icon-btn" data-act="editSchedule" data-sid="'+s.id+'">수정</button>'+
+          '<button class="icon-btn" data-act="deleteSchedule" data-sid="'+s.id+'">삭제</button>'+
+        '</div>'+
+      '</div>'+
+      '<div class="places">'+places+'</div>'+
+      '<div class="card-actions">'+
+        '<button class="secondary" data-act="addPlace" data-sid="'+s.id+'">＋ 장소/링크</button>'+
+        '<button class="primary" data-act="shareSchedule" data-sid="'+s.id+'">일정 공유</button>'+
+      '</div>'+
+    '</section>';
+  }).join("")
+}
+
+function openScheduleEditor(id){
+  const s=id?data.find(function(x){return x.id===id}):null;
+  $("scheduleModalTitle").textContent=s?"일정 수정":"새 일정";
+  $("scheduleId").value=s?s.id:"";
+  $("scheduleName").value=s?s.name:"";
+  $("scheduleDate").value=s?s.date:selectedDate;
+  $("scheduleTime").value=s?(s.time||""):"14:00";
+  openModal("scheduleModal")
+}
+
+function saveSchedule(){
+  const id=$("scheduleId").value;
+  const name=$("scheduleName").value.trim();
+  const date=$("scheduleDate").value;
+  const time=$("scheduleTime").value;
+  if(!name)return toast("일정 이름을 입력해주세요");
+  if(!date)return toast("날짜를 선택해주세요");
+
+  if(id){
+    const s=data.find(function(x){return x.id===id});if(!s)return;
+    s.name=name;s.date=date;s.time=time;
+  }else{
+    data.push({id:uid(),date:date,name:name,time:time,places:[]})
+  }
+
+  selectedDate=date;
+  const p=date.split("-").map(Number);viewYear=p[0];viewMonth=p[1]-1;
+  persist();closeModal("scheduleModal");render();toast(id?"수정했습니다":"일정을 만들었습니다")
+}
+
+function deleteSchedule(id){
+  const s=data.find(function(x){return x.id===id});if(!s)return;
+  if(confirm("‘"+s.name+"’ 일정을 삭제할까요?")){
+    data=data.filter(function(x){return x.id!==id});persist();render();toast("삭제했습니다")
+  }
+}
+
+function openPlaceEditor(sid,index){
+  const s=data.find(function(x){return x.id===sid});if(!s)return;
+  const p=(index!==null&&index!==undefined)?s.places[index]:null;
+  $("placeModalTitle").textContent=p?"장소 수정":"장소 / 링크 추가";
+  $("placeScheduleId").value=sid;
+  $("placeIndex").value=p?String(index):"";
+  $("placeLink").value=p?(p.link||""):"";
+  $("placeName").value=p?p.name:"";
+  $("placeTag").value=p?(p.tag||""):"";
+  openModal("placeModal")
+}
+
+function savePlace(){
+  const sid=$("placeScheduleId").value;
+  const s=data.find(function(x){return x.id===sid});if(!s)return;
+  const idx=$("placeIndex").value;
+  const link=$("placeLink").value.trim();
+  const name=$("placeName").value.trim();
+  const tag=$("placeTag").value.trim();
+  if(!name)return toast("이름을 입력해주세요");
+  const p={name:name,tag:tag,link:link};
+  if(idx==="")s.places.push(p);else s.places[Number(idx)]=p;
+  persist();closeModal("placeModal");render();toast(idx===""?"추가했습니다":"수정했습니다")
+}
+
+function deletePlace(sid,index){
+  const s=data.find(function(x){return x.id===sid});if(!s)return;
+  if(confirm("이 장소를 삭제할까요?")){
+    s.places.splice(index,1);persist();render();toast("삭제했습니다")
+  }
+}
+
+function movePlace(sid,index,delta){
+  const s=data.find(function(x){return x.id===sid});if(!s)return;
+  const to=index+delta;if(to<0||to>=s.places.length)return;
+  const tmp=s.places[index];s.places[index]=s.places[to];s.places[to]=tmp;
+  persist();render()
+}
+
+function scheduleText(s){
+  return [s.name,s.date+(s.time?" · "+s.time:"")]
+    .concat(s.places.map(function(p,i){return pad(i+1)+" "+p.name+(p.link?"\n"+p.link:"")}))
+    .join("\n")
+}
+
+async function copyText(text){
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(text);return true}}catch(e){}
+  return false
+}
+
+async function shareSchedule(id){
+  const s=data.find(function(x){return x.id===id});if(!s)return;
+  const text=scheduleText(s);
+  if(navigator.share){try{await navigator.share({title:s.name,text:text});return}catch(e){}}
+  const ok=await copyText(text);toast(ok?"일정 내용을 복사했습니다":"공유할 수 없습니다")
+}
+
+async function shareDay(){
+  const list=getDaySchedules();if(!list.length)return toast("공유할 일정이 없습니다");
+  const text=list.map(scheduleText).join("\n\n");
+  if(navigator.share){try{await navigator.share({title:"코스노트 일정",text:text});return}catch(e){}}
+  const ok=await copyText(text);toast(ok?"일정을 복사했습니다":"공유할 수 없습니다")
+}
+
+function exportBackup(){
+  const blob=new Blob([JSON.stringify({version:4,data:data},null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="coursenote-backup.json";
+  document.body.appendChild(a);a.click();a.remove()
+}
+
+function importBackup(file){
+  const r=new FileReader();
+  r.onload=function(){
+    try{
+      const obj=JSON.parse(r.result),arr=Array.isArray(obj)?obj:obj.data;
+      if(!Array.isArray(arr))throw new Error();
+      data=arr;
+      data.forEach(function(s){(s.places||[]).forEach(function(p){delete p.lat;delete p.lng})});
+      persist();closeModal("settingsModal");render();toast("백업을 불러왔습니다")
+    }catch(e){alert("올바른 코스노트 백업 파일이 아닙니다.")}
+  };
+  r.readAsText(file)
+}
+
+function resetDemo(){
+  if(confirm("현재 데이터를 지우고 샘플로 되돌릴까요?")){
+    data=clone(SAMPLE);selectedDate="2026-09-20";viewYear=2026;viewMonth=8;
+    persist();closeModal("settingsModal");render()
+  }
+}
+
+$("prevMonth").onclick=function(){viewMonth--;if(viewMonth<0){viewMonth=11;viewYear--}renderCalendar()};
+$("nextMonth").onclick=function(){viewMonth++;if(viewMonth>11){viewMonth=0;viewYear++}renderCalendar()};
+$("addScheduleBtn").onclick=function(){openScheduleEditor(null)};
+$("saveScheduleBtn").onclick=saveSchedule;
+$("savePlaceBtn").onclick=savePlace;
+$("shareDayBtn").onclick=shareDay;
+$("settingsBtn").onclick=function(){openModal("settingsModal")};
+$("backupBtn").onclick=exportBackup;
+$("restoreBtn").onclick=function(){$("restoreFile").click()};
+$("resetBtn").onclick=resetDemo;
+
+$("copyAllBtn").onclick=async function(){
+  const text=data.map(scheduleText).join("\n\n──────────\n\n");
+  const ok=await copyText(text);toast(ok?"전체 일정을 복사했습니다":"복사할 수 없습니다")
+};
+
+$("restoreFile").onchange=function(e){
+  if(e.target.files&&e.target.files[0])importBackup(e.target.files[0]);
+  e.target.value=""
+};
+
+document.querySelectorAll(".close-modal").forEach(function(btn){
+  btn.onclick=function(){closeModal(btn.dataset.modal)}
+});
+
+document.querySelectorAll(".modal").forEach(function(modal){
+  modal.onclick=function(e){if(e.target===modal)closeModal(modal.id)}
+});
+
+$("scheduleList").onclick=function(e){
+  const btn=e.target.closest("[data-act]");
+  if(btn){
+    e.stopPropagation();
+    const act=btn.dataset.act,sid=btn.dataset.sid,index=Number(btn.dataset.index);
+    if(act==="toggleTools"){
+      const row=btn.closest("[data-place-row]");if(row)row.classList.toggle("open");return
+    }
+    if(act==="editSchedule")openScheduleEditor(sid);
+    else if(act==="deleteSchedule")deleteSchedule(sid);
+    else if(act==="addPlace")openPlaceEditor(sid,null);
+    else if(act==="shareSchedule")shareSchedule(sid);
+    else if(act==="up")movePlace(sid,index,-1);
+    else if(act==="down")movePlace(sid,index,1);
+    else if(act==="editPlace")openPlaceEditor(sid,index);
+    else if(act==="deletePlace")deletePlace(sid,index);
+  }
+};
+
+render();
+})();
+</script>
+</body>
+</html>
