@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-14T10:16:47.922Z",
+  "data": [
+    {
+      "id": "a",
+      "date": "2026-09-20",
+      "name": "세종문화회관",
+      "time": "12:00",
+      "places": [
+        {
+          "name": "세종문화회관",
+          "tag": "전시",
+          "link": "https://naver.me/55rMXPRT"
+        },
+        {
+          "name": "점심",
+          "tag": "타코(미정)",
+          "link": "https://naver.me/F2nZExOy"
+        },
+        {
+          "name": "청계천",
+          "tag": "산책",
+          "link": "https://naver.me/x9BNpU9t"
+        },
+        {
+          "name": "스타더스트",
+          "tag": "서점",
+          "link": "https://naver.me/xBwHDlSl"
+        },
+        {
+          "name": "저녁",
+          "tag": "",
+          "link": ""
+        }
+      ]
+    },
+    {
+      "id": "mtvqj8vcao3ja",
+      "date": "2026-09-20",
+      "name": "역북쓰",
+      "time": "15:00",
+      "places": [
+        {
+          "name": "콘크리트정글",
+          "tag": "",
+          "link": "https://naver.me/FxFtXavJ"
+        },
+        {
+          "name": "더로컬라운지",
+          "tag": "",
+          "link": "https://naver.me/Gdy8Oq77"
+        }
+      ]
+    }
+  ]
+}
